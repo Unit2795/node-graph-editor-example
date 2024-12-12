@@ -23,14 +23,15 @@ interface Square {
 const SQUARE_SIZE = 40;
 const GRID_WIDTH = 400;
 const GRID_HEIGHT = 400;
-const GRID_COLUMNS = Math.floor(GRID_WIDTH / SQUARE_SIZE);
-const GRID_ROWS = Math.floor(GRID_HEIGHT / SQUARE_SIZE);
 
 const Grid = () => {
 	const svgRef = useRef<SVGSVGElement>(null);
 	const [squares, setSquares] = useState<Square[]>([]);
 	const [draggedSquare, setDraggedSquare] = useState<Square | null>(null);
+	const [isOverGrid, setIsOverGrid] = useState(false);
+	const [isDraggingExisting, setIsDraggingExisting] = useState(false);
 	const dragging = useToolbarDragging();
+	const showGhostSquare = dragging.isDragging && (isOverGrid || isDraggingExisting);
 
 	const getGridPosition = (e) => {
 		if (!svgRef.current) return;
@@ -106,12 +107,15 @@ const Grid = () => {
 		}
 
 		dragging.stopDragging();
+		setIsOverGrid(false);
+		setIsDraggingExisting(false);
 	};
 
 	const handleSquareMouseDown = (square, e) => {
 		e.preventDefault();
 		setDraggedSquare({ ...square, originalX: square.x, originalY: square.y });
 		dragging.setDragging(true, square.nodeType, { x: square.x, y: square.y });
+		setIsDraggingExisting(true);
 	};
 
 	const handleMouseMove = (e) => {
@@ -129,6 +133,25 @@ const Grid = () => {
 		}
 		setDraggedSquare(null);
 		dragging.stopDragging();
+		setIsOverGrid(false);
+		setIsDraggingExisting(false);
+	};
+
+	const handleDragEnter = (e) => {
+		e.preventDefault();
+		setIsOverGrid(true);
+	};
+
+	const handleDragLeave = (e) => {
+		if (!svgRef.current?.contains(e.relatedTarget)) {
+			setIsOverGrid(false);
+		}
+	};
+
+	const handleMouseLeave = () => {
+		if (!isDraggingExisting) {
+			setIsOverGrid(false);
+		}
 	};
 
 
@@ -140,9 +163,12 @@ const Grid = () => {
 				width={GRID_WIDTH}
 				height={GRID_HEIGHT}
 				onDragOver={handleDragOver}
+				onDragEnter={handleDragEnter}
+				onDragLeave={handleDragLeave}
 				onDrop={handleDrop}
 				onMouseMove={handleMouseMove}
 				onMouseUp={handleMouseUp}
+				onMouseLeave={handleMouseLeave}
 			>
 				{squares.map(square => (
 					<rect
@@ -161,7 +187,7 @@ const Grid = () => {
 					/>
 				))}
 
-				{dragging.isDragging && (
+				{showGhostSquare && (
 					<rect
 						x={dragging.position.x}
 						y={dragging.position.y}
