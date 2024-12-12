@@ -33,7 +33,7 @@ const Toolbar = () => {
 			</div>
 			<div className={'buttons'}>
 				<button onClick={() => {
-					alert("- Drag nodes from the toolbar onto the page to place them.\n- Drag existing nodes to move them around.\n- Click on a node to select it, click it again to deselect it.\n- Press 'Delete' key or click delete button to remove selected nodes.\n- With two nodes selected, link them by pressing 'Enter' key. Events can connect to other Event or Action nodes. The first selected Event node will point to the second selected one. Events will always point to Actions.\n- Press Clear to deselect all nodes.")
+					alert("- Drag nodes from the toolbar onto the page to place them.\n- Drag existing nodes to move them around.\n- Click on a node to select it, click it again to deselect it.\n- Press 'Delete' key to remove selected nodes.\n- With two nodes selected, link them by pressing 'Enter' key. Events can connect to other Event or Action nodes. The first selected Event node will point to the second selected one. Events will always point to Actions.")
 				}}>Tutorial
 				</button>
 				{
@@ -50,14 +50,6 @@ const Toolbar = () => {
 						onChange={handleFileImport}/>
 					Import
 				</label>
-				{/*<button onClick={() => {
-					loadFromFile();
-				}}>Import
-				</button>*/}
-				{/*<button>Select All</button>
-				<button>Delete</button>
-				<button>Link</button>
-				<button>Clear</button>*/}
 			</div>
 		</div>
 	);
