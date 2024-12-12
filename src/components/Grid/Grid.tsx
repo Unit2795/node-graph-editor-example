@@ -108,6 +108,29 @@ const Grid = () => {
 		dragging.stopDragging();
 	};
 
+	const handleSquareMouseDown = (square, e) => {
+		e.preventDefault();
+		setDraggedSquare({ ...square, originalX: square.x, originalY: square.y });
+		dragging.setDragging(true, square.nodeType, { x: square.x, y: square.y });
+	};
+
+	const handleMouseMove = (e) => {
+		if (draggedSquare && dragging.isDragging) {
+			const pos = getGridPosition(e);
+			if (pos && !isPositionOccupied(pos.gridX, pos.gridY)) {
+				dragging.setPosition(pos.x, pos.y);
+			}
+		}
+	};
+
+	const handleMouseUp = (e) => {
+		if (draggedSquare && dragging.isDragging) {
+			handleDrop(e);
+		}
+		setDraggedSquare(null);
+		dragging.stopDragging();
+	};
+
 
     return (
 		<div className="grid">
@@ -118,6 +141,8 @@ const Grid = () => {
 				height={GRID_HEIGHT}
 				onDragOver={handleDragOver}
 				onDrop={handleDrop}
+				onMouseMove={handleMouseMove}
+				onMouseUp={handleMouseUp}
 			>
 				{squares.map(square => (
 					<rect
@@ -128,7 +153,8 @@ const Grid = () => {
 						height={SQUARE_SIZE}
 						rx="4"
 						ry="4"
-						className={"cursor-move " + (square.nodeType === NodeType.EVENT ? "event" : "action")}
+						onMouseDown={(e) => handleSquareMouseDown(square, e)}
+						className={(square.nodeType === NodeType.EVENT ? "event" : "action")}
 						style={{
 							display: draggedSquare?.id === square.id ? 'none' : 'block'
 						}}
@@ -143,8 +169,7 @@ const Grid = () => {
 						height={SQUARE_SIZE}
 						rx="4"
 						ry="4"
-						fill="#4CAF50"
-						className="pointer-events-none"
+						className={(dragging.nodeType === NodeType.EVENT ? "event" : "action")}
 						style={{ opacity: 0.5 }}
 					/>
 				)}

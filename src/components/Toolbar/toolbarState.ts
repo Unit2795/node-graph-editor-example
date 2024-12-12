@@ -12,7 +12,10 @@ interface DraggingState {
 		x: number;
 		y: number;
 	}
-	setDragging: (isDragging: boolean, nodeType: NodeType) => void;
+	setDragging: (isDragging: boolean, nodeType: NodeType, position?: {
+		x: number;
+		y: number;
+	}) => void;
 	setPosition: (x: number, y: number) => void;
 	stopDragging: () => void;
 }
@@ -24,7 +27,17 @@ export const useToolbarDragging = create<DraggingState>((set) => ({
 		x: 0,
 		y: 0
 	},
-	setDragging: (isDragging: boolean, nodeType: NodeType) => set({ isDragging, nodeType }),
+	setDragging: (isDragging: boolean, nodeType: NodeType, position?: {
+		x: number;
+		y: number;
+	}) => set({
+		isDragging,
+		nodeType,
+		position: {
+			x: position?.x || 0,
+			y: position?.y || 0
+		}
+	}),
 	setPosition: (x: number, y: number) => set({ position: { x, y } }),
 	stopDragging: () => set({ isDragging: false })
 }))
