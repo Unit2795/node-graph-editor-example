@@ -1,9 +1,9 @@
 import './Grid.css';
 import '../Toolbar/Toolbar.css';
-import {useEffect, useRef, useState, MouseEvent} from "react";
+import {useEffect, useRef, useState, MouseEvent, DragEvent} from "react";
 import {NodeType, useToolbarDragging} from "../Toolbar/toolbarState.ts";
 
-interface Node {
+interface GridNode {
 	id: number;
 	nodeType: NodeType;
 	// Pixel location where the node is rendered
@@ -28,11 +28,13 @@ const SQUARE_SIZE = 40;
 
 const Grid = () => {
 	const svgRef = useRef<SVGSVGElement>(null);
-	const [nodes, setNodes] = useState<Node[]>([]);
+	const [nodes, setNodes] = useState<GridNode[]>([]);
 	const [connections, setConnections] = useState<NodeConnection[]>([]);
 	const [selectedNodes, setSelectedNodes] = useState<number[]>([]);
 
-	const [draggedNode, setDraggedNode] = useState<Node | null>(null);
+	const [draggedNode, setDraggedNode] = useState<(GridNode & {
+		initialPosition: {gridX: number; gridY: number};
+	}) | null>(null);
 	const [isOverGrid, setIsOverGrid] = useState(false);
 	const [isDraggingExisting, setIsDraggingExisting] = useState(false);
 
@@ -151,7 +153,7 @@ const Grid = () => {
 		handleNewConnection(fromNode, toNode);
 	};
 
-	const handleNewConnection = (fromNode: Node, toNode: Node) => {
+	const handleNewConnection = (fromNode: GridNode, toNode: GridNode) => {
 		const [firstId, secondId] = selectedNodes;
 
 		// Rules for connections:
@@ -208,13 +210,13 @@ const Grid = () => {
 		return () => {
 			document.removeEventListener('keyup', handleKeyDown);
 		};
-	}, [selectedNodes, nodes, connections]);
+	}, [selectedNodes, nodes, connections, modifyConnections]);
 
 	// -----------------------------------------------
 	// Mouse and Drag event handlers
 	// -----------------------------------------------
 
-	const handleGridDragOver = (e: React.DragEvent<SVGSVGElement>) => {
+	const handleGridDragOver = (e: DragEvent<SVGSVGElement>) => {
 		e.preventDefault();
 		if (!dragging.isDragging) return;
 
@@ -224,7 +226,7 @@ const Grid = () => {
 		}
 	};
 
-	const handleGridDrop = (e: React.DragEvent<SVGSVGElement>) => {
+	const handleGridDrop = (e: DragEvent<SVGSVGElement>) => {
 		e.preventDefault();
 		const pos = getGridPositionFromEvent(e);
 		if (!pos) return;
@@ -249,16 +251,18 @@ const Grid = () => {
 		setIsDraggingExisting(false);
 	};
 
-	const handleNodeMouseDown = (node: Node, e: React.MouseEvent) => {
+	const handleNodeMouseDown = (node: GridNode, e: MouseEvent) => {
 		e.preventDefault();
-		toggleNodeSelection(node.id);
 
-		setDraggedNode({...node, originalX: node.x, originalY: node.y});
+		// Store the node's initial grid position
+		const initialPosition = { gridX: node.gridX, gridY: node.gridY };
+
+		setDraggedNode({...node, originalX: node.x, originalY: node.y, initialPosition});
 		dragging.setDragging(true, node.nodeType, {x: node.x, y: node.y});
 		setIsDraggingExisting(true);
 	};
 
-	const handleMouseMove = (e: React.MouseEvent) => {
+	const handleMouseMove = (e: MouseEvent) => {
 		if (draggedNode && dragging.isDragging) {
 			const pos = getGridPositionFromEvent(e);
 			if (pos && !isPositionOccupied(pos.gridX, pos.gridY)) {
@@ -267,23 +271,34 @@ const Grid = () => {
 		}
 	};
 
-	const handleMouseUp = (e: React.MouseEvent) => {
+	const handleMouseUp = (e: MouseEvent) => {
 		if (draggedNode && dragging.isDragging) {
-			handleGridDrop(e as unknown as React.DragEvent<SVGSVGElement>);
+			const pos = getGridPositionFromEvent(e);
+			if (pos) {
+				const hasMoved = draggedNode.gridX !== pos.gridX || draggedNode.gridY !== pos.gridY;
+
+				if (!hasMoved) {
+					// Only toggle selection if the node hasn't moved to a new grid slot
+					toggleNodeSelection(draggedNode.id);
+				}
+			}
+
+			handleGridDrop(e as unknown as DragEvent<SVGSVGElement>);
 		}
+
 		setDraggedNode(null);
 		dragging.stopDragging();
 		setIsOverGrid(false);
 		setIsDraggingExisting(false);
 	};
 
-	const handleDragEnter = (e: React.DragEvent<SVGSVGElement>) => {
+	const handleDragEnter = (e: DragEvent<SVGSVGElement>) => {
 		e.preventDefault();
 		setIsOverGrid(true);
 	};
 
-	const handleDragLeave = (e: React.DragEvent<SVGSVGElement>) => {
-		if (!svgRef.current?.contains(e.relatedTarget as Node)) {
+	const handleDragLeave = (e: DragEvent<SVGSVGElement>) => {
+		if (!svgRef.current?.contains(e.relatedTarget as unknown as Node)) {
 			setIsOverGrid(false);
 		}
 	};
