@@ -20,7 +20,8 @@
 }
 
 .toolbar {
-    width: 64px;
+    margin: 24px;
+    width: 80px;
     background: #f0f0f0;
     display: flex;
     flex-direction: column;

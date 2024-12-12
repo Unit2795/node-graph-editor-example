@@ -10,8 +10,8 @@ const Toolbar = () => {
 
     return (
 		<div className="toolbar">
-			<div id={"event"} draggable className="draggable event" onDragStart={isDragging(true, NodeType.EVENT)}>E</div>
-			<div id={"action"} draggable className="draggable action" onDragStart={isDragging(true, NodeType.ACTION)}>A</div>
+			<div draggable className="draggable event" onDragStart={isDragging(true, NodeType.EVENT)}>E</div>
+			<div draggable className="draggable action" onDragStart={isDragging(true, NodeType.ACTION)}>A</div>
 		</div>
 	);
 };
