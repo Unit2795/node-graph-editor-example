@@ -1,12 +1,12 @@
 # Node Graph Editor Example
 
 ## Synopsis
-A simple example of a 2D editor for creating workflow diagram editor where you can connect "Events" to other "Events" or "Actions".
+A simple example of a 2D editor for creating workflow diagrams where you can connect "Events" to other "Events" or "Actions".
 
 ![Example](docs/example.png)
 
 ## Motivation
-Created to demonstrate a performant means of rendering a 2D diagram with lots of interactive nodes. 
+Created to demonstrate a performant means of rendering a 2D diagram with lots of interactive nodes.
 
 ## How To Use
 - Drag nodes from the toolbar onto the page to place them
@@ -28,3 +28,5 @@ Created to demonstrate a performant means of rendering a 2D diagram with lots of
 - Allow panning/zooming of grid
 - Virtualize the grid so that only visible nodes are rendered
 - Allow multiple nodes to be connected simultaneously, maybe by drawing a line between them
+- Allow sectors to be added to the grid to help organize nodes
+- Explore alternate means of rendering the diagram, such as using WebGL, canvas, or a game engine? (This might be overkill and may not be faster or necessary)
