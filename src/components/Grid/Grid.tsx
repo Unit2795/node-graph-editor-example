@@ -3,11 +3,11 @@ import '../Toolbar/Toolbar.css'
 import {useRef, useState} from "react";
 import {NodeType, useToolbarDragging} from "../Toolbar/toolbarState.ts";
 
-interface Square {
+interface Node {
 	id: number;
 	nodeType: NodeType;
 
-	// Pixel location where the square is rendered
+	// Pixel location where the node is rendered
 	x: number;
 	y: number;
 
@@ -15,33 +15,43 @@ interface Square {
 	gridX: number;
 	gridY: number;
 
-	// Original position of the square before dragging
+	// Original position of the node before dragging
 	originalX: number;
 	originalY: number;
 }
 
+// Desired size of each node square in the grid (in pixels)
 const SQUARE_SIZE = 40;
-const GRID_WIDTH = 400;
-const GRID_HEIGHT = 400;
 
 const Grid = () => {
+	// Reference to the SVG grid that will contain our squares
 	const svgRef = useRef<SVGSVGElement>(null);
-	const [squares, setSquares] = useState<Square[]>([]);
-	const [draggedSquare, setDraggedSquare] = useState<Square | null>(null);
+	// Array of nodes that are rendered on the grid
+	const [nodes, setNodes] = useState<Node[]>([]);
+	// Node that is currently being dragged
+	const [draggedNode, setDraggedNode] = useState<Node | null>(null);
+	// Whether the cursor is currently over the grid
 	const [isOverGrid, setIsOverGrid] = useState(false);
+	// Whether the cursor is currently dragging an existing node
 	const [isDraggingExisting, setIsDraggingExisting] = useState(false);
+	// Custom hook to manage the toolbar dragging state
 	const dragging = useToolbarDragging();
-	const showGhostSquare = dragging.isDragging && (isOverGrid || isDraggingExisting);
+	// Whether to show the ghost node if a new or existing node
+	const showGhostNode = dragging.isDragging && (isOverGrid || isDraggingExisting);
 
 	const getGridPosition = (e) => {
 		if (!svgRef.current) return;
 		const rect = svgRef.current.getBoundingClientRect();
+
+		// Calculate the mouse position relative to the SVG grid
 		const x = e.clientX - rect.left;
 		const y = e.clientY - rect.top;
 
+		// Calculate the grid column and row based on the mouse position
 		const gridX = Math.floor(x / SQUARE_SIZE);
 		const gridY = Math.floor(y / SQUARE_SIZE);
 
+		// Return pixel coordinate snapped to grid, as well as the grid column and row
 		return {
 			x: gridX * SQUARE_SIZE,
 			y: gridY * SQUARE_SIZE,
@@ -52,14 +62,14 @@ const Grid = () => {
 
 	// Determine if the dragged node is being placed into an occupied position
 	const isPositionOccupied = (gridX: number, gridY: number) => {
-		return squares.some(square =>
-			square.gridX === gridX &&
-			square.gridY === gridY &&
-			(!draggedSquare || draggedSquare.id !== square.id)
+		return nodes.some(node =>
+			node.gridX === gridX &&
+			node.gridY === gridY &&
+			(!draggedNode || draggedNode.id !== node.id)
 		);
 	};
 
-	// Handle drag over event to update the ghost square position
+	// Handle drag over event to update the ghost node position
 	const handleDragOver = (e) => {
 		e.preventDefault();
 		if (dragging.isDragging) {
@@ -77,17 +87,17 @@ const Grid = () => {
 
 		// Check if the position is valid (in bounds) and not occupied
 		if (!isPositionOccupied(pos.gridX, pos.gridY)) {
-			if (draggedSquare) {
+			if (draggedNode) {
 				// Moving existing square
-				setSquares(squares.map(square =>
-					square.id === draggedSquare.id
-						? { ...square, ...pos }
-						: square
+				setNodes(nodes.map(node =>
+					node.id === draggedNode.id
+						? { ...node, ...pos }
+						: node
 				));
-				setDraggedSquare(null);
+				setDraggedNode(null);
 			} else {
-				// Adding new square from toolbar
-				setSquares([...squares, {
+				// Adding new node from toolbar
+				setNodes([...nodes, {
 					id: Date.now(),
 					nodeType: dragging.nodeType,
 					originalX: pos.x,
@@ -95,13 +105,13 @@ const Grid = () => {
 					...pos
 				}]);
 			}
-		} else if (draggedSquare) {
-			// Reset dragged square position if dropped on occupied cell
-			setSquares(
-				squares.map(square =>
-					square.id === draggedSquare.id
-						? { ...square, x: draggedSquare.originalX, y: draggedSquare.originalY }
-						: square
+		} else if (draggedNode) {
+			// Reset dragged node position if dropped on occupied cell
+			setNodes(
+				nodes.map(node =>
+					node.id === draggedNode.id
+						? { ...node, x: draggedNode.originalX, y: draggedNode.originalY }
+						: node
 				)
 			);
 		}
@@ -111,15 +121,15 @@ const Grid = () => {
 		setIsDraggingExisting(false);
 	};
 
-	const handleSquareMouseDown = (square, e) => {
+	const handleNodeMouseDown = (node, e) => {
 		e.preventDefault();
-		setDraggedSquare({ ...square, originalX: square.x, originalY: square.y });
-		dragging.setDragging(true, square.nodeType, { x: square.x, y: square.y });
+		setDraggedNode({ ...node, originalX: node.x, originalY: node.y });
+		dragging.setDragging(true, node.nodeType, { x: node.x, y: node.y });
 		setIsDraggingExisting(true);
 	};
 
 	const handleMouseMove = (e) => {
-		if (draggedSquare && dragging.isDragging) {
+		if (draggedNode && dragging.isDragging) {
 			const pos = getGridPosition(e);
 			if (pos && !isPositionOccupied(pos.gridX, pos.gridY)) {
 				dragging.setPosition(pos.x, pos.y);
@@ -128,10 +138,10 @@ const Grid = () => {
 	};
 
 	const handleMouseUp = (e) => {
-		if (draggedSquare && dragging.isDragging) {
+		if (draggedNode && dragging.isDragging) {
 			handleDrop(e);
 		}
-		setDraggedSquare(null);
+		setDraggedNode(null);
 		dragging.stopDragging();
 		setIsOverGrid(false);
 		setIsDraggingExisting(false);
@@ -159,9 +169,7 @@ const Grid = () => {
 		<div className="grid">
 			<svg
 				ref={svgRef}
-				id="grid-svg"
-				width={GRID_WIDTH}
-				height={GRID_HEIGHT}
+				width="100%" height="100%"
 				onDragOver={handleDragOver}
 				onDragEnter={handleDragEnter}
 				onDragLeave={handleDragLeave}
@@ -170,24 +178,24 @@ const Grid = () => {
 				onMouseUp={handleMouseUp}
 				onMouseLeave={handleMouseLeave}
 			>
-				{squares.map(square => (
+				{nodes.map(node => (
 					<rect
-						key={square.id}
-						x={square.x}
-						y={square.y}
+						key={node.id}
+						x={node.x}
+						y={node.y}
 						width={SQUARE_SIZE}
 						height={SQUARE_SIZE}
 						rx="4"
 						ry="4"
-						onMouseDown={(e) => handleSquareMouseDown(square, e)}
-						className={(square.nodeType === NodeType.EVENT ? "event" : "action")}
+						onMouseDown={(e) => handleNodeMouseDown(node, e)}
+						className={(node.nodeType === NodeType.EVENT ? "event" : "action")}
 						style={{
-							display: draggedSquare?.id === square.id ? 'none' : 'block'
+							display: draggedNode?.id === node.id ? 'none' : 'block'
 						}}
 					/>
 				))}
 
-				{showGhostSquare && (
+				{showGhostNode && (
 					<rect
 						x={dragging.position.x}
 						y={dragging.position.y}
