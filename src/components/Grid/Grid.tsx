@@ -179,33 +179,57 @@ const Grid = () => {
 				onMouseLeave={handleMouseLeave}
 			>
 				{nodes.map(node => (
-					<rect
-						key={node.id}
-						x={node.x}
-						y={node.y}
-						width={SQUARE_SIZE}
-						height={SQUARE_SIZE}
-						rx="4"
-						ry="4"
+					<g
 						onMouseDown={(e) => handleNodeMouseDown(node, e)}
-						className={(node.nodeType === NodeType.EVENT ? "event" : "action")}
 						style={{
 							display: draggedNode?.id === node.id ? 'none' : 'block'
-						}}
-					/>
+						}}>
+						<rect
+							key={node.id}
+							x={node.x}
+							y={node.y}
+							width={SQUARE_SIZE}
+							height={SQUARE_SIZE}
+							rx="4"
+							ry="4"
+							className={(node.nodeType === NodeType.EVENT ? "event" : "action")}
+						/>
+						<text
+							style={{
+								userSelect: 'none',
+							}}
+							x={node.x + SQUARE_SIZE / 2}
+							y={node.y + SQUARE_SIZE / 2}
+							dominant-baseline="middle"
+							text-anchor="middle">
+							{node.nodeType === NodeType.EVENT ? "E" : "A"}
+						</text>
+					</g>
 				))}
 
 				{showGhostNode && (
-					<rect
-						x={dragging.position.x}
-						y={dragging.position.y}
-						width={SQUARE_SIZE}
-						height={SQUARE_SIZE}
-						rx="4"
-						ry="4"
-						className={(dragging.nodeType === NodeType.EVENT ? "event" : "action")}
-						style={{ opacity: 0.5 }}
-					/>
+					<g>
+						<rect
+							x={dragging.position.x}
+							y={dragging.position.y}
+							width={SQUARE_SIZE}
+							height={SQUARE_SIZE}
+							rx="4"
+							ry="4"
+							className={(dragging.nodeType === NodeType.EVENT ? "event" : "action")}
+							style={{opacity: 0.5}}
+						/>
+						<text
+							style={{
+								userSelect: 'none',
+							}}
+							x={dragging.position.x + SQUARE_SIZE / 2}
+							y={dragging.position.y + SQUARE_SIZE / 2}
+							dominant-baseline="middle"
+							text-anchor="middle">
+							{dragging.nodeType === NodeType.EVENT ? "E" : "A"}
+						</text>
+					</g>
 				)}
 			</svg>
 		</div>
