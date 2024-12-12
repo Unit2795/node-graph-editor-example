@@ -4,7 +4,6 @@
     cursor: grab;
     border-radius: 4px;
     color: black;
-    margin: 10px;
     font-size: 24px;
     text-align: center;
 }
@@ -26,4 +25,62 @@
     display: flex;
     flex-direction: column;
     align-items: center;
+}
+
+.title {
+    color: #333333;
+    font-size: 16px;
+    margin: 0;
+    padding: 4px 0;
+    background-color: #bfbfbf;
+    width: 100%;
+    text-align: center;
+    font-weight: lighter;
+}
+
+.buttons {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    width: 100%;
+    margin-top: 32px;
+
+    button, .file-button {
+        padding: 10px 0;
+        border: unset;
+        background: #595959;
+        width: 80px;
+        cursor: pointer;
+        color: white;
+        font-family: Arial, sans-serif;
+        font-size: 12px;
+        text-align: center;
+    }
+    button:hover {
+        background: #333333;
+    }
+
+    .file-button {
+        input[type="file"] {
+            display: none;
+        }
+    }
+}
+
+.nodes {
+    margin-top: 22px;
+
+    .node {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        width: 100%;
+        padding: 8px 0;
+    }
+
+    p {
+        margin: 0;
+        color: black;
+    }
 }

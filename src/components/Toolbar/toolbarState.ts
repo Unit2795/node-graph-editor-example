@@ -1,4 +1,4 @@
-import {create} from "zustand/index";
+import {create} from "zustand";
 
 export enum NodeType {
 	EVENT = "event",

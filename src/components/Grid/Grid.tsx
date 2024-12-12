@@ -2,6 +2,7 @@ import './Grid.css';
 import '../Toolbar/Toolbar.css';
 import {useEffect, useRef, useState, MouseEvent, DragEvent} from "react";
 import {NodeType, useToolbarDragging} from "../Toolbar/toolbarState.ts";
+import {useGridStore} from "./gridState.ts";
 
 interface GridNode {
 	id: number;
@@ -28,8 +29,7 @@ const SQUARE_SIZE = 40;
 
 const Grid = () => {
 	const svgRef = useRef<SVGSVGElement>(null);
-	const [nodes, setNodes] = useState<GridNode[]>([]);
-	const [connections, setConnections] = useState<NodeConnection[]>([]);
+	const {nodes, connections, setNodes, setConnections} = useGridStore();
 	const [selectedNodes, setSelectedNodes] = useState<number[]>([]);
 
 	const [draggedNode, setDraggedNode] = useState<(GridNode & {
@@ -210,7 +210,7 @@ const Grid = () => {
 		return () => {
 			document.removeEventListener('keyup', handleKeyDown);
 		};
-	}, [selectedNodes, nodes, connections, modifyConnections]);
+	}, [selectedNodes, nodes, connections, modifyConnections, setNodes]);
 
 	// -----------------------------------------------
 	// Mouse and Drag event handlers
