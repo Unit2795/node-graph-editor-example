@@ -6,7 +6,7 @@ A simple example of a 2D editor for creating workflow diagrams where you can con
 ![Example](docs/example.png)
 
 ## Motivation
-Created to demonstrate a performant means of rendering a 2D diagram with lots of interactive nodes.
+Created to demonstrate a performant means of rendering a 2D diagram with lots of interactive nodes by using SVG.
 
 ## How To Use
 - Drag nodes from the toolbar onto the page to place them
@@ -16,6 +16,21 @@ Created to demonstrate a performant means of rendering a 2D diagram with lots of
 - With two nodes selected, connect them by pressing 'Enter' key. Events can connect to other Event or Action nodes. The first selected Event node will point to the second selected one. Events will always point to Actions
 - Click 'Save' button to save the diagram to a JSON file
 - Click 'Import' button to load a diagram from a JSON file
+
+## Try It Out
+- Visit the [deployed GitHub Pages site](https://unit2795.github.io/node-graph-editor-example/) to try out the live demo
+
+## Installation and Development
+- Run `pnpm install` in the root directory to install dependencies
+- Run `pnpm run dev` to start the development server and visit  http://localhost:5173/node-graph-editor-example/
+- Run `pnpm run build` to build the project, open the `dist/index.html` file in your browser to view the production build
+
+## Key Technologies
+- React
+- TypeScript
+- SVG
+- Vite
+- Zustand
 
 ## Known Bugs
 - A connection line can be formed over a node and obscure it
